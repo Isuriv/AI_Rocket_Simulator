@@ -146,8 +146,9 @@ with tab3:
                 optimizer.step()
                 losses.append(loss.item())
 
-            # Final optimized simulation
-            final_opt, trajectory_opt = simulate_single_rocket(opt_initial_state, thrust_opt, torque_opt)
+            # Final optimized simulation (no graph needed for display)
+            with torch.no_grad():
+                final_opt, trajectory_opt = simulate_single_rocket(opt_initial_state, thrust_opt, torque_opt)
 
             st.success("Optimization Complete!")
 
@@ -160,7 +161,7 @@ with tab3:
 
             # Plot optimized trajectory
             fig, ax = plt.subplots()
-            traj = trajectory_opt.numpy()
+            traj = trajectory_opt.detach().cpu().numpy()
             ax.plot(traj[:, 0], traj[:, 1], color='blue')
             ax.axhline(y=0, color='green', linestyle='--')
             ax.scatter([0], [0], color='orange', s=120, zorder=5)
