@@ -1,0 +1,5 @@
+numpy
+matplotlib
+streamlit
+# Install the CPU wheel separately so pip does not pull a multi-GB CUDA build:
+#   python3 -m pip install torch --index-url https://download.pytorch.org/whl/cpu
