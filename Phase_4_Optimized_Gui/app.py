@@ -103,7 +103,8 @@ if st.button("Run Gradient Optimization"):
             losses.append(loss.item())
 
         # Final results
-        final_state, trajectory = simulate_rocket(initial_state, thrust_opt, torque_opt)
+        with torch.no_grad():
+            final_state, trajectory = simulate_rocket(initial_state, thrust_opt, torque_opt)
 
         st.success("Optimization Complete!")
 
@@ -116,7 +117,7 @@ if st.button("Run Gradient Optimization"):
 
         # Plot trajectory after optimization
         fig, ax = plt.subplots()
-        traj = trajectory.numpy()
+        traj = trajectory.detach().cpu().numpy()
         ax.plot(traj[:, 0], traj[:, 1], color='blue')
         ax.axhline(y=0, color='green', linestyle='--')
         ax.scatter([0], [0], color='orange', s=150, zorder=5)

@@ -37,10 +37,11 @@ def simulate_single_rocket(initial_state, thrust, torque):
         theta = theta + omega * DT
         fuel = fuel - (thrust / MAX_THRUST) * 0.25 * DT
 
-        trajectory.append([x.item(), y.item()])
+        # Keep positions as tensors so torch.vmap can batch this function.
+        trajectory.append(torch.stack([x, y]))
 
     final_state = torch.stack([x, y, vx, vy, theta, omega, fuel])
-    return final_state, torch.tensor(trajectory)
+    return final_state, torch.stack(trajectory)
 
 def simulate_fleet(initial_states, thrusts, torques):
     """Vectorized simulation for multiple rockets"""
@@ -49,7 +50,7 @@ def simulate_fleet(initial_states, thrusts, torques):
     return final_states, trajectories
 
 def compute_loss(final_state):
-    x, y, vx, vy, theta, omega, fuel = final_state
+    x, y, vx, vy, theta, omega, fuel = final_state.unbind(-1)
     return (x**2 + y**2) * 1.5 + (vx**2 + vy**2) + theta**2 * 2 + torch.relu(-y) * 50
 
 # ====================== SIDEBAR ======================
@@ -145,8 +146,9 @@ with tab3:
                 optimizer.step()
                 losses.append(loss.item())
 
-            # Final optimized simulation
-            final_opt, trajectory_opt = simulate_single_rocket(opt_initial_state, thrust_opt, torque_opt)
+            # Final optimized simulation (no graph needed for display)
+            with torch.no_grad():
+                final_opt, trajectory_opt = simulate_single_rocket(opt_initial_state, thrust_opt, torque_opt)
 
             st.success("Optimization Complete!")
 
@@ -159,7 +161,7 @@ with tab3:
 
             # Plot optimized trajectory
             fig, ax = plt.subplots()
-            traj = trajectory_opt.numpy()
+            traj = trajectory_opt.detach().cpu().numpy()
             ax.plot(traj[:, 0], traj[:, 1], color='blue')
             ax.axhline(y=0, color='green', linestyle='--')
             ax.scatter([0], [0], color='orange', s=120, zorder=5)

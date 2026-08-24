@@ -70,31 +70,64 @@ This project showcases:
 These skills are directly applicable to aerospace simulation, autonomous systems, and AI-driven engineering at companies like SpaceX.
 
 ## Project Structure
-rocket-simulator/
-├── phase1_differentiable_physics/
-├── phase2_vectorized_simulation/
-├── phase3_streamlit_app/
-├── phase4_optimized_gui/
-├── phase5_integrated_app/          # ← Final integrated version
+```
+AI_Rocket_Simulator/
+├── Phase_1_Differentiable_Physics/   # CLI: differentiable landing + gradient descent
+├── Phase_2_Vectorized_Simulation/    # CLI: torch.vmap fleet simulation
+├── Phase_3_Streamlit_App/            # Streamlit: interactive single-rocket GUI
+├── Phase_4_Optimized_Gui/            # Streamlit: manual sim + gradient optimization
+├── Phase_5_Integrated_App/           # Streamlit: single / fleet / optimize tabs
+├── Phase_6_Multi_Agent/              # Streamlit: multi-agent avoidance demo
 ├── requirements.txt
 └── README.md
+```
 
 ## Getting Started
 
 ### 1. Clone the repository
 ```bash
-git clone https://github.com/yourusername/rocket-simulator.git
-cd rocket-simulator
+git clone https://github.com/Isuriv/AI_Rocket_Simulator.git
+cd AI_Rocket_Simulator
 ```
-### 2. Create virtual environment & install dependencies
+
+### 2. Install dependencies
+
+Python 3.10+ is required. Install the CPU build of PyTorch (avoids a multi-GB CUDA wheel):
+
 ```bash
-python -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
+python3 -m pip install -r requirements.txt
+python3 -m pip install torch --index-url https://download.pytorch.org/whl/cpu
 ```
-### 3. Run individual phases
+
+Or run the same bootstrap used by Cloud Agents:
+
 ```bash
-cd phase4_optimized_gui
-chmod +x run.sh
-./run.sh
+bash .cursor/install.sh
 ```
+
+### 3. Run the integrated app (Phase 5)
+
+```bash
+python3 -m streamlit run Phase_5_Integrated_App/app.py
+```
+
+Then open http://localhost:8501
+
+### 4. Other phases
+
+CLI scripts (print results; Phase 1 also writes `phase1_loss_curve.png`):
+
+```bash
+python3 Phase_1_Differentiable_Physics/differentiable_physics.py
+python3 Phase_2_Vectorized_Simulation/vectorized_simulation.py
+```
+
+Other Streamlit apps:
+
+```bash
+python3 -m streamlit run Phase_3_Streamlit_App/app.py
+python3 -m streamlit run Phase_4_Optimized_Gui/app.py
+python3 -m streamlit run Phase_6_Multi_Agent/app.py
+```
+
+Each phase also has a `run.sh` that creates a local `venv/` and installs dependencies. That path needs the `python3-venv` package (`sudo apt-get install python3-venv` on Debian/Ubuntu).
