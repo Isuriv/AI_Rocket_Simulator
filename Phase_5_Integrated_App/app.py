@@ -269,3 +269,34 @@ with tab3:
             ax3.set_ylabel("Thrust (N)")
             ax3.legend()
             st.pyplot(fig3)
+
+        # ---- Recommended landing control values ----
+        thrust_np = thrust_seq.numpy()
+        torque_np = torque_seq.numpy()
+        times = np.arange(NUM_STEPS) * DT
+        threshold = thrust_np.min() + 0.5 * (thrust_np.max() - thrust_np.min())
+        burn_start = int(np.argmax(thrust_np > threshold))
+
+        st.subheader("Recommended landing control values")
+        st.caption(
+            "A single constant thrust/torque cannot land this rocket — these values are the "
+            "time-varying schedule that does. Hold near hover to descend, then burn hard to touch down."
+        )
+        c1, c2, c3, c4 = st.columns(4)
+        c1.metric("Initial thrust", f"{thrust_np[0]:.0f} N")
+        c2.metric("Coast thrust", f"{np.median(thrust_np[:burn_start]) if burn_start > 0 else thrust_np[0]:.0f} N")
+        c3.metric("Peak burn thrust", f"{thrust_np.max():.0f} N")
+        c4.metric("Burn starts at", f"{times[burn_start]:.2f} s")
+
+        sample_idx = np.linspace(0, NUM_STEPS - 1, 10).astype(int)
+        schedule_table = {
+            "time (s)": [f"{times[i]:.2f}" for i in sample_idx],
+            "thrust (N)": [f"{thrust_np[i]:.1f}" for i in sample_idx],
+            "torque": [f"{torque_np[i]:+.2f}" for i in sample_idx],
+        }
+        st.table(schedule_table)
+
+        csv = "time_s,thrust_N,torque\n" + "\n".join(
+            f"{times[i]:.3f},{thrust_np[i]:.4f},{torque_np[i]:.4f}" for i in range(NUM_STEPS)
+        )
+        st.download_button("Download full control schedule (CSV)", csv, file_name="landing_schedule.csv")
