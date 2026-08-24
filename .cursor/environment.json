@@ -1,0 +1,18 @@
+{
+  "name": "AI Rocket Simulator",
+  "install": "bash .cursor/install.sh",
+  "start": "true",
+  "terminals": [
+    {
+      "name": "phase5-streamlit",
+      "command": "python3 -m streamlit run Phase_5_Integrated_App/app.py --server.address 0.0.0.0 --server.port 8501 --server.headless true",
+      "description": "Phase 5 integrated Streamlit app (single rocket, fleet, and gradient optimization) on port 8501"
+    }
+  ],
+  "ports": [
+    {
+      "name": "streamlit",
+      "port": 8501
+    }
+  ]
+}
