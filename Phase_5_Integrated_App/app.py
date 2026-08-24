@@ -37,10 +37,11 @@ def simulate_single_rocket(initial_state, thrust, torque):
         theta = theta + omega * DT
         fuel = fuel - (thrust / MAX_THRUST) * 0.25 * DT
 
-        trajectory.append([x.item(), y.item()])
+        # Keep positions as tensors so torch.vmap can batch this function.
+        trajectory.append(torch.stack([x, y]))
 
     final_state = torch.stack([x, y, vx, vy, theta, omega, fuel])
-    return final_state, torch.tensor(trajectory)
+    return final_state, torch.stack(trajectory)
 
 def simulate_fleet(initial_states, thrusts, torques):
     """Vectorized simulation for multiple rockets"""
@@ -49,7 +50,7 @@ def simulate_fleet(initial_states, thrusts, torques):
     return final_states, trajectories
 
 def compute_loss(final_state):
-    x, y, vx, vy, theta, omega, fuel = final_state
+    x, y, vx, vy, theta, omega, fuel = final_state.unbind(-1)
     return (x**2 + y**2) * 1.5 + (vx**2 + vy**2) + theta**2 * 2 + torch.relu(-y) * 50
 
 # ====================== SIDEBAR ======================
