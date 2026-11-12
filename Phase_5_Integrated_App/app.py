@@ -37,10 +37,10 @@ def simulate_single_rocket(initial_state, thrust, torque):
         theta = theta + omega * DT
         fuel = fuel - (thrust / MAX_THRUST) * 0.25 * DT
 
-        trajectory.append([x.item(), y.item()])
+        trajectory.append(torch.stack([x, y]))
 
     final_state = torch.stack([x, y, vx, vy, theta, omega, fuel])
-    return final_state, torch.tensor(trajectory)
+    return final_state, torch.stack(trajectory)
 
 def simulate_fleet(initial_states, thrusts, torques):
     """Vectorized simulation for multiple rockets"""
@@ -117,7 +117,7 @@ with tab2:
         ax.set_ylabel("Altitude")
         st.pyplot(fig)
 
-        avg_loss = compute_loss(final_states).mean().item()
+        avg_loss = torch.vmap(compute_loss)(final_states).mean().item()
         st.write(f"**Average Landing Loss across fleet:** {avg_loss:.2f}")
 
 # ====================== TAB 3: GRADIENT OPTIMIZATION ======================
@@ -159,7 +159,7 @@ with tab3:
 
             # Plot optimized trajectory
             fig, ax = plt.subplots()
-            traj = trajectory_opt.numpy()
+            traj = trajectory_opt.detach().numpy()
             ax.plot(traj[:, 0], traj[:, 1], color='blue')
             ax.axhline(y=0, color='green', linestyle='--')
             ax.scatter([0], [0], color='orange', s=120, zorder=5)
